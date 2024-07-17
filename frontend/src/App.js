@@ -11,11 +11,11 @@ function App() {
     <Router>
       <div className="App">
         <Routes>
-          <Route exact path="/" component={Home} />
-          <Route path="/login" component={Login} />
-          <Route path="/users" component={UserList} />
-          <Route path="/address" component={AddressForm} />
-          <Route component={ErrorPage} />
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/users" element={<UserList />} />
+          <Route path="/address" element={<AddressForm />} />
+          <Route path="*" element={<ErrorPage />} />
         </Routes>
       </div>
     </Router>
