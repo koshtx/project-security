@@ -3,57 +3,91 @@ package com.example.project.controller;
 import com.example.project.dto.LoginRequest;
 import com.example.project.dto.RegisterRequest;
 import com.example.project.dto.JwtResponse;
+import com.example.project.dto.UserDto;
 import com.example.project.security.JwtUtil;
 import com.example.project.service.UserService;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
+import com.example.project.service.UserSessionService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/auth")
-@RequiredArgsConstructor
 public class AuthenticationController {
 
-    private final AuthenticationManager authenticationManager;
-    private final UserService userService;
-    private final JwtUtil jwtUtil;
+    @Autowired
+    private AuthenticationManager authenticationManager;
 
-    @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequest registerRequest) {
-        if (userService.existsByUsername(registerRequest.getUsername())) {
-            return ResponseEntity.badRequest().body("Error: Username is already taken!");
-        }
-        if (userService.existsByEmail(registerRequest.getEmail())) {
-            return ResponseEntity.badRequest().body("Error: Email is already in use!");
-        }
-        userService.registerUser(registerRequest);
-        return ResponseEntity.ok("User registered successfully!");
-    }
+    @Autowired
+    private JwtUtil jwtUtil;
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private UserSessionService userSessionService;
 
     @PostMapping("/login")
-    public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {
         Authentication authentication = authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword())
         );
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        String jwt = jwtUtil.generateToken(userDetails);
+        UserDto userDto = userService.getUserByUsername(loginRequest.getUsername())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        String jwt = jwtUtil.generateToken(userDto.getUsername());
         
-        List<String> roles = userDetails.getAuthorities().stream()
-            .map(GrantedAuthority::getAuthority)
-            .collect(Collectors.toList());
+        userSessionService.saveSession(userDto.getUsername(), jwt);
 
-        return ResponseEntity.ok(new JwtResponse(jwt, userDetails.getUsername(), roles));
+        return ResponseEntity.ok(new JwtResponse(jwt, userDto.getId(), userDto.getUsername(), userDto.getEmail()));
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<?> registerUser(@RequestBody RegisterRequest registerRequest) {
+        if (userService.existsByUsername(registerRequest.getUsername())) {
+            return ResponseEntity.badRequest().body("Error: Username is already taken!");
+        }
+
+        if (userService.existsByEmail(registerRequest.getEmail())) {
+            return ResponseEntity.badRequest().body("Error: Email is already in use!");
+        }
+
+        UserDto registeredUser = userService.registerUser(registerRequest);
+        return ResponseEntity.ok(new JwtResponse(
+            jwtUtil.generateToken(registeredUser.getUsername()),
+            registeredUser.getId(),
+            registeredUser.getUsername(),
+            registeredUser.getEmail()
+        ));
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refreshToken(@RequestHeader("Authorization") String token) {
+        if (token != null && token.startsWith("Bearer ")) {
+            String jwt = token.substring(7);
+            if (userSessionService.isSessionValid(jwt)) {
+                String refreshedToken = jwtUtil.refreshToken(jwt);
+                userSessionService.invalidateSession(jwt);
+                String username = jwtUtil.extractUsername(refreshedToken);
+                userSessionService.saveSession(username, refreshedToken);
+                return ResponseEntity.ok(new JwtResponse(refreshedToken));
+            }
+        }
+        return ResponseEntity.badRequest().body("Invalid token");
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logoutUser(@RequestHeader("Authorization") String token) {
+        if (token != null && token.startsWith("Bearer ")) {
+            String jwt = token.substring(7);
+            userSessionService.invalidateSession(jwt);
+            return ResponseEntity.ok("Logged out successfully");
+        }
+        return ResponseEntity.badRequest().body("Invalid token");
     }
 }

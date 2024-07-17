@@ -3,23 +3,21 @@ package com.example.project.controller;
 import com.example.project.dto.LoginRequest;
 import com.example.project.dto.RegisterRequest;
 import com.example.project.dto.JwtResponse;
-import com.example.project.entity.User;
+import com.example.project.dto.UserDto;
 import com.example.project.security.JwtUtil;
 import com.example.project.service.UserService;
+import com.example.project.service.UserSessionService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Collections;
+import java.util.Optional;
 
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -30,10 +28,13 @@ class AuthenticationControllerTest {
     private AuthenticationManager authenticationManager;
 
     @Mock
+    private JwtUtil jwtUtil;
+
+    @Mock
     private UserService userService;
 
     @Mock
-    private JwtUtil jwtUtil;
+    private UserSessionService userSessionService;
 
     @InjectMocks
     private AuthenticationController authenticationController;
@@ -44,41 +45,67 @@ class AuthenticationControllerTest {
     }
 
     @Test
-    void testRegisterUser() {
-        RegisterRequest registerRequest = new RegisterRequest("testuser", "test@example.com", "password");
-        when(userService.existsByUsername("testuser")).thenReturn(false);
-        when(userService.existsByEmail("test@example.com")).thenReturn(false);
-
-        ResponseEntity<?> response = authenticationController.registerUser(registerRequest);
-
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals("User registered successfully!", response.getBody());
-        verify(userService).registerUser(registerRequest);
-    }
-
-    @Test
     void testAuthenticateUser() {
         LoginRequest loginRequest = new LoginRequest("testuser", "password");
         Authentication authentication = mock(Authentication.class);
-        User user = new User();
-        user.setId(1L);
-        user.setUsername("testuser");
-        user.setEmail("test@example.com");
-        UserDetails userDetails = new org.springframework.security.core.userdetails.User(
-            user.getUsername(), user.getPassword(), Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
-        );
-        when(authentication.getPrincipal()).thenReturn(userDetails);
+        UserDto userDto = new UserDto(1L, "testuser", "test@example.com", null);
+        
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).thenReturn(authentication);
-        when(jwtUtil.generateToken(any(UserDetails.class))).thenReturn("testToken");
+        when(userService.getUserByUsername("testuser")).thenReturn(Optional.of(userDto));
+        when(jwtUtil.generateToken("testuser")).thenReturn("testToken");
 
         ResponseEntity<?> response = authenticationController.authenticateUser(loginRequest);
 
-        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(200, response.getStatusCodeValue());
         assertTrue(response.getBody() instanceof JwtResponse);
         JwtResponse jwtResponse = (JwtResponse) response.getBody();
-        assertNotNull(jwtResponse);
         assertEquals("testToken", jwtResponse.getToken());
         assertEquals("testuser", jwtResponse.getUsername());
-        assertEquals(Collections.singletonList("ROLE_USER"), jwtResponse.getRoles());
+        
+        verify(userSessionService).saveSession("testuser", "testToken");
+    }
+
+    @Test
+    void testRegisterUser() {
+        RegisterRequest registerRequest = new RegisterRequest("newuser", "new@example.com", "password");
+        UserDto registeredUser = new UserDto(1L, "newuser", "new@example.com", null);
+        
+        when(userService.existsByUsername("newuser")).thenReturn(false);
+        when(userService.existsByEmail("new@example.com")).thenReturn(false);
+        when(userService.registerUser(registerRequest)).thenReturn(registeredUser);
+        when(jwtUtil.generateToken("newuser")).thenReturn("newUserToken");
+
+        ResponseEntity<?> response = authenticationController.registerUser(registerRequest);
+
+        assertEquals(200, response.getStatusCodeValue());
+        assertTrue(response.getBody() instanceof JwtResponse);
+        JwtResponse jwtResponse = (JwtResponse) response.getBody();
+        assertEquals("newUserToken", jwtResponse.getToken());
+        assertEquals("newuser", jwtResponse.getUsername());
+    }
+
+    @Test
+    void testRegisterUserUsernameExists() {
+        RegisterRequest registerRequest = new RegisterRequest("existinguser", "new@example.com", "password");
+        
+        when(userService.existsByUsername("existinguser")).thenReturn(true);
+
+        ResponseEntity<?> response = authenticationController.registerUser(registerRequest);
+
+        assertEquals(400, response.getStatusCodeValue());
+        assertEquals("Error: Username is already taken!", response.getBody());
+    }
+
+    @Test
+    void testRegisterUserEmailExists() {
+        RegisterRequest registerRequest = new RegisterRequest("newuser", "existing@example.com", "password");
+        
+        when(userService.existsByUsername("newuser")).thenReturn(false);
+        when(userService.existsByEmail("existing@example.com")).thenReturn(true);
+
+        ResponseEntity<?> response = authenticationController.registerUser(registerRequest);
+
+        assertEquals(400, response.getStatusCodeValue());
+        assertEquals("Error: Email is already in use!", response.getBody());
     }
 }

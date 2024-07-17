@@ -1,7 +1,7 @@
 package com.example.project.service;
 
-import com.example.project.dto.UserDto;
 import com.example.project.dto.RegisterRequest;
+import com.example.project.dto.UserDto;
 import com.example.project.entity.User;
 import com.example.project.entity.Role;
 import com.example.project.repository.UserRepository;
@@ -11,8 +11,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,22 +32,16 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserDto registerUser(RegisterRequest registerRequest) {
-        if (userRepository.existsByUsername(registerRequest.getUsername())) {
-            throw new RuntimeException("Error: Username is already taken!");
-        }
-
-        if (userRepository.existsByEmail(registerRequest.getEmail())) {
-            throw new RuntimeException("Error: Email is already in use!");
-        }
-
         User user = new User();
         user.setUsername(registerRequest.getUsername());
         user.setEmail(registerRequest.getEmail());
         user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
 
+        Set<Role> roles = new HashSet<>();
         Role userRole = roleRepository.findByName("ROLE_USER")
                 .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-        user.getRoles().add(userRole);
+        roles.add(userRole);
+        user.setRoles(roles);
 
         User savedUser = userRepository.save(user);
         return convertToDto(savedUser);
@@ -74,11 +70,11 @@ public class UserServiceImpl implements UserService {
     }
 
     private UserDto convertToDto(User user) {
-        return new UserDto(
-            user.getId(),
-            user.getUsername(),
-            user.getEmail(),
-            user.getRoles().stream().map(Role::getName).collect(Collectors.toSet())
-        );
+        UserDto dto = new UserDto();
+        dto.setId(user.getId());
+        dto.setUsername(user.getUsername());
+        dto.setEmail(user.getEmail());
+        dto.setRoles(user.getRoles().stream().map(Role::getName).collect(Collectors.toSet()));
+        return dto;
     }
 }

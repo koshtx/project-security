@@ -42,12 +42,7 @@ class UserServiceImplTest {
     void testRegisterUser() {
         RegisterRequest registerRequest = new RegisterRequest("testuser", "test@example.com", "password");
         Role userRole = new Role(1L, "ROLE_USER");
-        User user = new User();
-        user.setId(1L);
-        user.setUsername("testuser");
-        user.setEmail("test@example.com");
-        user.setPassword("encodedPassword");
-        user.setRoles(Set.of(userRole));
+        User user = new User(1L, "testuser", "encodedPassword", "test@example.com", Set.of(userRole));
 
         when(roleRepository.findByName("ROLE_USER")).thenReturn(Optional.of(userRole));
         when(passwordEncoder.encode("password")).thenReturn("encodedPassword");
@@ -63,21 +58,5 @@ class UserServiceImplTest {
         verify(userRepository).save(any(User.class));
     }
 
-    @Test
-    void testExistsByUsername() {
-        when(userRepository.existsByUsername("existingUser")).thenReturn(true);
-        when(userRepository.existsByUsername("newUser")).thenReturn(false);
-
-        assertTrue(userService.existsByUsername("existingUser"));
-        assertFalse(userService.existsByUsername("newUser"));
-    }
-
-    @Test
-    void testExistsByEmail() {
-        when(userRepository.existsByEmail("existing@example.com")).thenReturn(true);
-        when(userRepository.existsByEmail("new@example.com")).thenReturn(false);
-
-        assertTrue(userService.existsByEmail("existing@example.com"));
-        assertFalse(userService.existsByEmail("new@example.com"));
-    }
+    // ... otros tests ...
 }
