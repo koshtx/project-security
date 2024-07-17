@@ -1,9 +1,13 @@
 package com.example.project.controller;
 
+import com.example.project.dto.RegisterRequest;
 import com.example.project.entity.Address;
 import com.example.project.entity.User;
 import com.example.project.service.AddressService;
 import com.example.project.service.UserService;
+
+import jakarta.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,9 +27,16 @@ public class UserController {
         this.addressService = addressService;
     }
 
-    @PostMapping
-    public ResponseEntity<User> registerUser(@RequestBody User user) {
-        return ResponseEntity.ok(userService.registerUser(user));
+    @PostMapping("/register")
+    public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequest registerRequest) {
+        if (userService.existsByUsername(registerRequest.getUsername())) {
+            return ResponseEntity.badRequest().body("Error: Username is already taken!");
+        }
+        if (userService.existsByEmail(registerRequest.getEmail())) {
+            return ResponseEntity.badRequest().body("Error: Email is already in use!");
+        }
+        userService.registerUser(registerRequest);
+        return ResponseEntity.ok("User registered successfully!");
     }
 
     @GetMapping("/{username}")

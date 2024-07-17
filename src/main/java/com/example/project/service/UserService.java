@@ -1,5 +1,6 @@
 package com.example.project.service;
 
+import com.example.project.dto.RegisterRequest;
 import com.example.project.entity.User;
 import java.util.List;
 import java.util.Optional;
@@ -8,10 +9,10 @@ public interface UserService {
     
     /**
      * Registra un nuevo usuario en el sistema.
-     * @param user El usuario a registrar
+     * @param registerRequest El usuario a registrar
      * @return El usuario registrado
      */
-    User registerUser(User user);
+    User registerUser(RegisterRequest registerRequest);
 
     /**
      * Busca un usuario por su nombre de usuario.

@@ -1,6 +1,7 @@
 package com.example.project.service;
 
 import com.example.project.entity.User;
+import com.example.project.dto.RegisterRequest;
 import com.example.project.entity.Role;
 import com.example.project.repository.UserRepository;
 import com.example.project.repository.RoleRepository;
@@ -9,9 +10,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -23,18 +24,16 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public User registerUser(User user) {
-        if (userRepository.existsByUsername(user.getUsername())) {
-            throw new RuntimeException("Username is already taken!");
-        }
-        if (userRepository.existsByEmail(user.getEmail())) {
-            throw new RuntimeException("Email is already in use!");
-        }
-        
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+    public User registerUser(RegisterRequest registerRequest) {
+        User user = new User();
+        user.setUsername(registerRequest.getUsername());
+        user.setEmail(registerRequest.getEmail());
+        user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
+
         Role userRole = roleRepository.findByName("ROLE_USER")
                 .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-        user.setRoles(Set.of(userRole));
+        user.setRoles(Collections.singleton(userRole));
+
         return userRepository.save(user);
     }
 
