@@ -2,7 +2,9 @@ package com.example.project.service;
 
 import com.example.project.dto.AddressDto;
 import com.example.project.entity.Address;
+import com.example.project.entity.User;
 import com.example.project.repository.AddressRepository;
+import com.example.project.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -19,6 +21,9 @@ class AddressServiceImplTest {
     @Mock
     private AddressRepository addressRepository;
 
+    @Mock
+    private UserRepository userRepository;
+
     @InjectMocks
     private AddressServiceImpl addressService;
 
@@ -29,10 +34,12 @@ class AddressServiceImplTest {
 
     @Test
     void testAddAddress() {
-        AddressDto addressDto = new AddressDto(null, "123 Test St", "Test City", "Test State", "12345");
-        Address address = new Address(null, "123 Test St", "Test City", "Test State", "12345", null);
-        Address savedAddress = new Address(1L, "123 Test St", "Test City", "Test State", "12345", null);
+        AddressDto addressDto = new AddressDto(null, "123 Test St", "Test City", "Test State", "12345", 1L);
+        User user = new User();
+        user.setId(1L);
+        Address savedAddress = new Address(1L, "123 Test St", "Test City", "Test State", "12345", user);
 
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(addressRepository.save(any(Address.class))).thenReturn(savedAddress);
 
         AddressDto result = addressService.addAddress(addressDto);
@@ -45,7 +52,9 @@ class AddressServiceImplTest {
 
     @Test
     void testGetAddressById() {
-        Address address = new Address(1L, "123 Test St", "Test City", "Test State", "12345", null);
+        User user = new User();
+        user.setId(1L);
+        Address address = new Address(1L, "123 Test St", "Test City", "Test State", "12345", user);
         when(addressRepository.findById(1L)).thenReturn(Optional.of(address));
 
         Optional<AddressDto> result = addressService.getAddressById(1L);

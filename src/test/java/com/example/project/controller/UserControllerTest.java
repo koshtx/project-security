@@ -41,19 +41,34 @@ class UserControllerTest {
         ResponseEntity<List<UserDto>> response = userController.getAllUsers();
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(2, response.getBody().size());
+        List<UserDto> responseBody = response.getBody();
+        assertNotNull(responseBody, "Response body should not be null");
+        assertEquals(2, responseBody.size(), "Response should contain 2 users");
         verify(userService).getAllUsers();
     }
 
     @Test
-    void testGetUserByUsername() {
+    void testGetUserByUsername_Found() {
         UserDto user = new UserDto(1L, "testuser", "test@example.com");
         when(userService.getUserByUsername("testuser")).thenReturn(Optional.of(user));
 
-        ResponseEntity<?> response = userController.getUserByUsername("testuser");
+        ResponseEntity<UserDto> response = userController.getUserByUsername("testuser");
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(user, response.getBody());
+        UserDto responseBody = response.getBody();
+        assertNotNull(responseBody, "Response body should not be null");
+        assertEquals("testuser", responseBody.getUsername(), "Username should match");
         verify(userService).getUserByUsername("testuser");
+    }
+
+    @Test
+    void testGetUserByUsername_NotFound() {
+        when(userService.getUserByUsername("nonexistent")).thenReturn(Optional.empty());
+
+        ResponseEntity<UserDto> response = userController.getUserByUsername("nonexistent");
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertNull(response.getBody(), "Response body should be null for not found user");
+        verify(userService).getUserByUsername("nonexistent");
     }
 }

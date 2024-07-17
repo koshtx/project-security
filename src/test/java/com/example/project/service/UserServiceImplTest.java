@@ -1,6 +1,7 @@
 package com.example.project.service;
 
 import com.example.project.dto.RegisterRequest;
+import com.example.project.dto.UserDto;
 import com.example.project.entity.User;
 import com.example.project.entity.Role;
 import com.example.project.repository.UserRepository;
@@ -15,7 +16,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -42,24 +42,23 @@ class UserServiceImplTest {
     void testRegisterUser() {
         RegisterRequest registerRequest = new RegisterRequest("testuser", "test@example.com", "password");
         Role userRole = new Role(1L, "ROLE_USER");
-        User savedUser = new User();
-        savedUser.setId(1L);
-        savedUser.setUsername("testuser");
-        savedUser.setPassword("encodedPassword");
-        savedUser.setEmail("test@example.com");
-        savedUser.setRoles(Set.of(userRole));
+        User user = new User();
+        user.setId(1L);
+        user.setUsername("testuser");
+        user.setEmail("test@example.com");
+        user.setPassword("encodedPassword");
+        user.setRoles(Set.of(userRole));
 
         when(roleRepository.findByName("ROLE_USER")).thenReturn(Optional.of(userRole));
         when(passwordEncoder.encode("password")).thenReturn("encodedPassword");
-        when(userRepository.save(any(User.class))).thenReturn(savedUser);
+        when(userRepository.save(any(User.class))).thenReturn(user);
 
-        User result = userService.registerUser(registerRequest);
+        UserDto result = userService.registerUser(registerRequest);
 
         assertNotNull(result);
         assertEquals("testuser", result.getUsername());
-        assertEquals("encodedPassword", result.getPassword());
         assertEquals("test@example.com", result.getEmail());
-        assertTrue(result.getRoles().contains(userRole));
+        assertTrue(result.getRoles().contains("ROLE_USER"));
 
         verify(userRepository).save(any(User.class));
     }

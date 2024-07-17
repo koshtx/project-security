@@ -16,6 +16,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.util.Collections;
 
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -60,15 +64,21 @@ class AuthenticationControllerTest {
         user.setId(1L);
         user.setUsername("testuser");
         user.setEmail("test@example.com");
-        when(authentication.getPrincipal()).thenReturn(user);
+        UserDetails userDetails = new org.springframework.security.core.userdetails.User(
+            user.getUsername(), user.getPassword(), Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
+        );
+        when(authentication.getPrincipal()).thenReturn(userDetails);
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).thenReturn(authentication);
-        when(jwtUtil.generateToken(any(User.class))).thenReturn("testToken");
+        when(jwtUtil.generateToken(any(UserDetails.class))).thenReturn("testToken");
 
         ResponseEntity<?> response = authenticationController.authenticateUser(loginRequest);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertTrue(response.getBody() instanceof JwtResponse);
         JwtResponse jwtResponse = (JwtResponse) response.getBody();
+        assertNotNull(jwtResponse);
         assertEquals("testToken", jwtResponse.getToken());
+        assertEquals("testuser", jwtResponse.getUsername());
+        assertEquals(Collections.singletonList("ROLE_USER"), jwtResponse.getRoles());
     }
 }
