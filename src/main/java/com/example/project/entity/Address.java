@@ -27,6 +27,12 @@ public class Address {
     @Column(nullable = false)
     private String zipCode;
 
+    @Column(nullable = false)
+    private String country;
+
+    @Column(nullable = false)
+    private Boolean isPrimary;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;

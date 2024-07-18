@@ -33,6 +33,8 @@ public class AddressServiceImpl implements AddressService {
         address.setCity(addressDto.getCity());
         address.setState(addressDto.getState());
         address.setZipCode(addressDto.getZipCode());
+        address.setCountry(addressDto.getCountry());
+        address.setIsPrimary(addressDto.getIsPrimary());
         address.setUser(user);
 
         Address savedAddress = addressRepository.save(address);
@@ -61,6 +63,8 @@ public class AddressServiceImpl implements AddressService {
         address.setCity(addressDto.getCity());
         address.setState(addressDto.getState());
         address.setZipCode(addressDto.getZipCode());
+        address.setCountry(addressDto.getCountry());
+        address.setIsPrimary(addressDto.getIsPrimary());
 
         Address updatedAddress = addressRepository.save(address);
         return convertToDto(updatedAddress);
@@ -79,6 +83,8 @@ public class AddressServiceImpl implements AddressService {
             address.getCity(),
             address.getState(),
             address.getZipCode(),
+            address.getCountry(),
+            address.getIsPrimary(),
             address.getUser().getId()
         );
     }

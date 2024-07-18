@@ -13,13 +13,17 @@ public class AddressDto {
     private String city;
     private String state;
     private String zipCode;
+    private String country;
+    private Boolean isPrimary;
     private Long userId;
 
-    public AddressDto(Long id, String street, String city, String state, String zipCode) {
+    public AddressDto(Long id, String street, String city, String state, String zipCode, String country, Boolean isPrimary) {
         this.id = id;
         this.street = street;
         this.city = city;
         this.state = state;
         this.zipCode = zipCode;
+        this.country = country;
+        this.isPrimary = isPrimary;
     }
 }

@@ -47,25 +47,6 @@ public class AuthenticationController {
         return ResponseEntity.ok(new JwtResponse(jwt, userDto.getId(), userDto.getUsername(), userDto.getEmail()));
     }
 
-    @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody RegisterRequest registerRequest) {
-        if (userService.existsByUsername(registerRequest.getUsername())) {
-            return ResponseEntity.badRequest().body("Error: Username is already taken!");
-        }
-
-        if (userService.existsByEmail(registerRequest.getEmail())) {
-            return ResponseEntity.badRequest().body("Error: Email is already in use!");
-        }
-
-        UserDto registeredUser = userService.registerUser(registerRequest);
-        return ResponseEntity.ok(new JwtResponse(
-            jwtUtil.generateToken(registeredUser.getUsername()),
-            registeredUser.getId(),
-            registeredUser.getUsername(),
-            registeredUser.getEmail()
-        ));
-    }
-
     @PostMapping("/refresh")
     public ResponseEntity<?> refreshToken(@RequestHeader("Authorization") String token) {
         if (token != null && token.startsWith("Bearer ")) {
@@ -89,5 +70,19 @@ public class AuthenticationController {
             return ResponseEntity.ok("Logged out successfully");
         }
         return ResponseEntity.badRequest().body("Invalid token");
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<?> registerUser(@RequestBody RegisterRequest registerRequest) {
+        if (userService.existsByUsername(registerRequest.getUsername())) {
+            return ResponseEntity.badRequest().body("Error: Username is already taken!");
+        }
+
+        if (userService.existsByEmail(registerRequest.getEmail())) {
+            return ResponseEntity.badRequest().body("Error: Email is already in use!");
+        }
+
+        UserDto userDto = userService.registerUser(registerRequest);
+        return ResponseEntity.ok("User registered successfully!");
     }
 }
