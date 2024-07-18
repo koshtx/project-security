@@ -62,6 +62,28 @@ function UserProfile() {
           />
         </div>
         <div className={styles.formGroup}>
+          <label htmlFor="firstName">First Name:</label>
+          <input
+            type="text"
+            id="firstName"
+            name="firstName"
+            value={profile.firstName}
+            onChange={handleChange}
+            required
+          />
+        </div>
+        <div className={styles.formGroup}>
+          <label htmlFor="lastName">Last Name:</label>
+          <input
+            type="text"
+            id="lastName"
+            name="lastName"
+            value={profile.lastName}
+            onChange={handleChange}
+            required
+          />
+        </div>
+        <div className={styles.formGroup}>
           <label htmlFor="email">Email:</label>
           <input
             type="email"

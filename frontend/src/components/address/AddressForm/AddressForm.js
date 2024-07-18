@@ -74,6 +74,28 @@ function AddressForm({ address, onSave }) {
           required
         />
       </div>
+      <div className={styles.formGroup}>
+        <label htmlFor="country">Country:</label>
+        <input
+          type="text"
+          id="country"
+          name="country"
+          value={formData.country}
+          onChange={handleChange}
+          required
+        />
+      </div>
+      <div className={styles.formGroup}>
+        <label htmlFor="isPrimary">is Primary?:</label>
+        <input
+          type="text"
+          id="isPrimary"
+          name="isPrimary"
+          value={formData.isPrimary}
+          onChange={handleChange}
+          required
+        />
+      </div>
       <button type="submit" className={styles.submitButton}>
         {address ? 'Update' : 'Add'} Address
       </button>

@@ -81,7 +81,9 @@ function UserList() {
           <tr>
             <th>Username</th>
             <th>Email</th>
-            <th>Actions</th>
+            {user.roles.includes('ROLE_ADMIN') && (
+              <th>Actions</th>
+            )}
           </tr>
         </thead>
         <tbody>
@@ -89,14 +91,14 @@ function UserList() {
             <tr key={users.id}>
               <td>{users.username}</td>
               <td>{users.email}</td>
+              {user.roles.includes('ROLE_ADMIN') && (
               <td>
-                {user.roles.includes('ROLE_ADMIN') && (
                   <>
                     <button onClick={() => handleEdit(users)} className={styles.editButton}>Edit</button>
                     <button onClick={() => handleDelete(users.id)} className={styles.deleteButton}>Delete</button>
-                  </>
-                )}
+                  </>  
               </td>
+              )}
             </tr>
           ))}
         </tbody>

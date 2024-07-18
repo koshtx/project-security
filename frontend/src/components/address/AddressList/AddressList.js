@@ -33,6 +33,7 @@ function AddressList() {
   const handleSearch = (searchTerm) => {
     const filtered = addresses.filter(address => 
       address.street.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      address.country.toLowerCase().includes(searchTerm.toLowerCase()) ||
       address.city.toLowerCase().includes(searchTerm.toLowerCase())
     );
     setFilteredAddresses(filtered);
@@ -78,6 +79,9 @@ function AddressList() {
             <th>Street</th>
             <th>City</th>
             <th>State</th>
+            <th>ZipCode</th>
+            <th>Country</th>
+            <th>isPrimary</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -87,6 +91,9 @@ function AddressList() {
               <td>{address.street}</td>
               <td>{address.city}</td>
               <td>{address.state}</td>
+              <td>{address.zipCode}</td>
+              <td>{address.country}</td>
+              <td>{address.isPrimary.toString()}</td>
               <td>
                 <button onClick={() => handleEdit(address)} className={styles.editButton}>Edit</button>
                 <button onClick={() => handleDelete(address.id)} className={styles.deleteButton}>Delete</button>

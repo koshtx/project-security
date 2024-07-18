@@ -2,9 +2,7 @@ package com.example.project.service;
 
 import com.example.project.dto.RoleDto;
 import com.example.project.entity.Role;
-import com.example.project.entity.User;
 import com.example.project.repository.RoleRepository;
-import com.example.project.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
