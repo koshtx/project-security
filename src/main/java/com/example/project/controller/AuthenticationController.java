@@ -44,7 +44,7 @@ public class AuthenticationController {
         
         userSessionService.saveSession(userDto.getUsername(), jwt);
 
-        return ResponseEntity.ok(new JwtResponse(jwt, userDto.getId(), userDto.getUsername(), userDto.getEmail()));
+        return ResponseEntity.ok(new JwtResponse(jwt, userDto.getId(), userDto.getUsername(), userDto.getEmail(), userDto.getRoles()));
     }
 
     @PostMapping("/refresh")
@@ -83,6 +83,6 @@ public class AuthenticationController {
         }
 
         UserDto userDto = userService.registerUser(registerRequest);
-        return ResponseEntity.ok("User registered successfully!");
+        return ResponseEntity.ok("User "+ userDto.getUsername()+ " registered successfully!");
     }
 }

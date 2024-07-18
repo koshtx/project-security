@@ -1,6 +1,7 @@
 package com.example.project.service;
 
 import com.example.project.dto.UserDto;
+import com.example.project.dto.UserProfileDto;
 import com.example.project.dto.RegisterRequest;
 import java.util.List;
 import java.util.Optional;
@@ -11,4 +12,6 @@ public interface UserService {
     List<UserDto> getAllUsers();
     boolean existsByUsername(String username);
     boolean existsByEmail(String email);
+    UserProfileDto getCurrentUserProfile();
+    UserProfileDto updateCurrentUserProfile(UserProfileDto userProfileDto);
 }

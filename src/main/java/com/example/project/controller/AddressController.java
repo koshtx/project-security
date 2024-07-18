@@ -22,6 +22,12 @@ public class AddressController {
         return new ResponseEntity<>(newAddress, HttpStatus.CREATED);
     }
 
+    @GetMapping
+    public ResponseEntity<List<AddressDto>> getaddAddress() {
+        List<AddressDto> address = addressService.getAddress();
+        return ResponseEntity.ok(address);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<AddressDto> getAddressById(@PathVariable Long id) {
         return addressService.getAddressById(id)

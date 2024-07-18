@@ -1,0 +1,22 @@
+.sidebar {
+    width: 200px;
+    background-color: #f4f4f4;
+    height: 100vh;
+    padding: 20px;
+  }
+  
+  .navList {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .navLink {
+    display: block;
+    padding: 10px;
+    color: #333;
+    text-decoration: none;
+  }
+  
+  .navLink:hover {
+    background-color: #ddd;
+  }

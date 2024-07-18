@@ -47,6 +47,13 @@ public class AddressServiceImpl implements AddressService {
     }
 
     @Override
+    public List<AddressDto> getAddress() {
+        return addressRepository.findAll().stream()
+            .map(this::convertToDto)
+            .collect(Collectors.toList());
+    }
+
+    @Override
     public List<AddressDto> getAddressesByUserId(Long userId) {
         return addressRepository.findByUserId(userId).stream()
                 .map(this::convertToDto)

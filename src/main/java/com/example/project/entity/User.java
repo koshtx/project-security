@@ -49,6 +49,9 @@ public class User implements UserDetails {
     @Column(nullable = false, unique = true)
     private String email;
 
+    private String firstName;
+    private String lastName;
+
     /**
      * Roles asignados al usuario.
      * Se utiliza una relación Many-to-Many con la entidad Role.

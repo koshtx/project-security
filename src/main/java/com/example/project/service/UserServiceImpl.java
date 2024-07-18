@@ -2,12 +2,13 @@ package com.example.project.service;
 
 import com.example.project.dto.RegisterRequest;
 import com.example.project.dto.UserDto;
+import com.example.project.dto.UserProfileDto;
 import com.example.project.entity.User;
 import com.example.project.entity.Role;
 import com.example.project.repository.UserRepository;
 import com.example.project.repository.RoleRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,14 +22,15 @@ import java.util.stream.Collectors;
 @Service
 public class UserServiceImpl implements UserService {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private RoleRepository roleRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     @Value("${default.user.role:ROLE_USER}")
     private String defaultUserRole;
@@ -106,5 +108,52 @@ public class UserServiceImpl implements UserService {
         dto.setEmail(user.getEmail());
         dto.setRoles(user.getRoles().stream().map(Role::getName).collect(Collectors.toSet()));
         return dto;
+    }
+
+    @Override
+    public UserProfileDto getCurrentUserProfile() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Current user not found"));
+        return convertToProfileDto(user);
+    }
+
+    @Override
+    @Transactional
+    public UserProfileDto updateCurrentUserProfile(UserProfileDto userProfileDto) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Current user not found"));
+
+        updateUserFromProfileDto(user, userProfileDto);
+        User updatedUser = userRepository.save(user);
+        return convertToProfileDto(updatedUser);
+    }
+
+    private UserProfileDto convertToProfileDto(User user) {
+        UserProfileDto dto = new UserProfileDto();
+        dto.setUsername(user.getUsername());
+        dto.setEmail(user.getEmail());
+        dto.setFirstName(user.getFirstName());
+        dto.setLastName(user.getLastName());
+        return dto;
+    }
+
+    private void updateUserFromProfileDto(User user, UserProfileDto dto) {
+        if (dto.getUsername() != null && !dto.getUsername().isEmpty()) {
+            user.setUsername(dto.getUsername());
+        }
+        if (dto.getEmail() != null && !dto.getEmail().isEmpty()) {
+            user.setEmail(dto.getEmail());
+        }
+        if (dto.getPassword() != null && !dto.getPassword().isEmpty()) {
+            user.setPassword(passwordEncoder.encode(dto.getPassword()));
+        }
+        if (dto.getFirstName() != null) {
+            user.setFirstName(dto.getFirstName());
+        }
+        if (dto.getLastName() != null) {
+            user.setLastName(dto.getLastName());
+        }
     }
 }

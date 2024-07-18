@@ -1,0 +1,33 @@
+.header {
+    background-color: #333;
+    padding: 10px 0;
+  }
+  
+  .navList {
+    list-style-type: none;
+    padding: 0;
+    display: flex;
+    justify-content: flex-end;
+  }
+  
+  .navLink {
+    color: white;
+    text-decoration: none;
+    padding: 10px 15px;
+  }
+  
+  .navLink:hover {
+    background-color: #555;
+  }
+  
+  .logoutButton {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 10px 15px;
+  }
+  
+  .logoutButton:hover {
+    background-color: #555;
+  }
