@@ -26,7 +26,7 @@ function App() {
             <Route path="/register" element={<Register />} />
             <Route path="/users" element={<ProtectedRoute><UserList /></ProtectedRoute>} />
             <Route path="/addresses" element={<ProtectedRoute><AddressList /></ProtectedRoute>} />
-            <Route path="/roles" element={<ProtectedRoute roles={['ADMIN']}><RoleList /></ProtectedRoute>} />
+            <Route path="/roles" element={<ProtectedRoute roles={['ROLE_ADMIN']}><RoleList /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><UserProfile /></ProtectedRoute>} />
             <Route path="/" element={
               user 

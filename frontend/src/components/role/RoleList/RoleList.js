@@ -58,7 +58,7 @@ function RoleList() {
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div className={styles.error}>{error}</div>;
 
-  if (!user.roles.includes('ADMIN')) {
+  if (!user.roles.includes('ROLE_ADMIN')) {
     return <div className={styles.unauthorized}>You do not have permission to view this page.</div>;
   }
 

@@ -73,7 +73,7 @@ function UserList() {
     <div className={styles.userList}>
       <h2>User Management</h2>
       <UserSearch onSearch={handleSearch} />
-      {user.roles.includes('ADMIN') && (
+      {user.roles.includes('ROLE_ADMIN') && (
         <button onClick={() => setShowModal(true)} className={styles.addButton}>Add New User</button>
       )}
       <table className={styles.userTable}>
@@ -85,15 +85,15 @@ function UserList() {
           </tr>
         </thead>
         <tbody>
-          {filteredUsers.map(user => (
-            <tr key={user.id}>
-              <td>{user.username}</td>
-              <td>{user.email}</td>
+          {filteredUsers.map(users => (
+            <tr key={users.id}>
+              <td>{users.username}</td>
+              <td>{users.email}</td>
               <td>
-                {user.roles.includes('ADMIN') && (
+                {user.roles.includes('ROLE_ADMIN') && (
                   <>
-                    <button onClick={() => handleEdit(user)} className={styles.editButton}>Edit</button>
-                    <button onClick={() => handleDelete(user.id)} className={styles.deleteButton}>Delete</button>
+                    <button onClick={() => handleEdit(users)} className={styles.editButton}>Edit</button>
+                    <button onClick={() => handleDelete(users.id)} className={styles.deleteButton}>Delete</button>
                   </>
                 )}
               </td>

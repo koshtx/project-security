@@ -16,7 +16,7 @@ function Home() {
               <li><Link to="/profile">My Profile</Link></li>
               <li><Link to="/users">Manage Users</Link></li>
               <li><Link to="/addresses">Manage Addresses</Link></li>
-              {user.roles.includes('ADMIN') && (
+              {user.roles.includes('ROLE_ADMIN') && (
                 <li><Link to="/roles">Manage Roles</Link></li>
               )}
             </ul>
