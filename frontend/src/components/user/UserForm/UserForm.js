@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styles from './UserForm.module.css';
 
-function UserForm({ user, onSave }) {
+function UserForm({ user1, onSave }) {
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -10,15 +10,18 @@ function UserForm({ user, onSave }) {
   });
 
   useEffect(() => {
-    if (user) {
+    console.log('User:' + user1);
+    if (user1) {
       setFormData({
-        username: user.username,
-        email: user.email,
+        username: user1.username,
+        firstName: user1.firstName,
+        lastName: user1.lastName,
+        email: user1.email,
         password: '',
-        roles: user.roles
+        roles: user1.roles
       });
     }
-  }, [user]);
+  }, [user1]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -47,6 +50,28 @@ function UserForm({ user, onSave }) {
         />
       </div>
       <div className={styles.formGroup}>
+        <label htmlFor="firstName">First Name:</label>
+        <input
+          type="text"
+          id="firstName"
+          name="firstName"
+          value={formData.firstName}
+          onChange={handleChange}
+          required
+        />
+      </div>
+      <div className={styles.formGroup}>
+        <label htmlFor="lastName">Last Name:</label>
+        <input
+          type="text"
+          id="lastName"
+          name="lastName"
+          value={formData.lastName}
+          onChange={handleChange}
+          required
+        />
+      </div>
+      <div className={styles.formGroup}>
         <label htmlFor="email">Email:</label>
         <input
           type="email"
@@ -65,11 +90,11 @@ function UserForm({ user, onSave }) {
           name="password"
           value={formData.password}
           onChange={handleChange}
-          required={!user}
+          required={!user1}
         />
       </div>
       <button type="submit" className={styles.submitButton}>
-        {user ? 'Update' : 'Add'} User
+        {user1 ? 'Update' : 'Add'} User
       </button>
     </form>
   );

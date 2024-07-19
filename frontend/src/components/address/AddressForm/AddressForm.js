@@ -5,6 +5,7 @@ function AddressForm({ address, onSave }) {
   const [formData, setFormData] = useState({
     street: '',
     city: '',
+    country: '',
     state: '',
     zipCode: ''
   });

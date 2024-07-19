@@ -23,6 +23,9 @@ function UserList() {
     try {
       setIsLoading(true);
       const data = await getUsers();
+      console.log('data:' + data);
+      console.log('user:' + user);
+      console.log('users' + users);
       setUsers(data);
       setFilteredUsers(data);
     } catch (error) {
@@ -33,15 +36,17 @@ function UserList() {
   };
 
   const handleSearch = (searchTerm) => {
-    const filtered = users.filter(user => 
-      user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase())
+    const filtered = users.filter(user1 => 
+      user1.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user1.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user1.lastNameame.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user1.email.toLowerCase().includes(searchTerm.toLowerCase())
     );
     setFilteredUsers(filtered);
   };
 
-  const handleEdit = (user) => {
-    setSelectedUser(user);
+  const handleEdit = (user1) => {
+    setSelectedUser(user1);
     setShowModal(true);
   };
 
@@ -80,6 +85,8 @@ function UserList() {
         <thead>
           <tr>
             <th>Username</th>
+            <th>First Name</th>
+            <th>Last Name</th>
             <th>Email</th>
             {user.roles.includes('ROLE_ADMIN') && (
               <th>Actions</th>
@@ -87,15 +94,17 @@ function UserList() {
           </tr>
         </thead>
         <tbody>
-          {filteredUsers.map(users => (
-            <tr key={users.id}>
-              <td>{users.username}</td>
-              <td>{users.email}</td>
+          {filteredUsers.map(user1 => (
+            <tr key={user1.id}>
+              <td>{user1.username}</td>
+              <td>{user1.firstName}</td>
+              <td>{user1.lastName}</td>
+              <td>{user1.email}</td>
               {user.roles.includes('ROLE_ADMIN') && (
               <td>
                   <>
-                    <button onClick={() => handleEdit(users)} className={styles.editButton}>Edit</button>
-                    <button onClick={() => handleDelete(users.id)} className={styles.deleteButton}>Delete</button>
+                    <button onClick={() => handleEdit(user1)} className={styles.editButton}>Edit</button>
+                    <button onClick={() => handleDelete(user1.id)} className={styles.deleteButton}>Delete</button>
                   </>  
               </td>
               )}
@@ -104,7 +113,7 @@ function UserList() {
         </tbody>
       </table>
       <Modal show={showModal} onClose={handleCloseModal}>
-        <UserForm user={selectedUser} onSave={handleSave} />
+        <UserForm user1={selectedUser} onSave={handleSave} />
       </Modal>
     </div>
   );
