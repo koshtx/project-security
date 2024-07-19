@@ -4,6 +4,7 @@ import com.example.project.dto.RegisterRequest;
 import com.example.project.dto.UserDto;
 import com.example.project.dto.UserProfileDto;
 import com.example.project.entity.User;
+//import com.example.project.entity.Address;
 import com.example.project.entity.Role;
 import com.example.project.repository.UserRepository;
 import com.example.project.repository.RoleRepository;
@@ -109,6 +110,9 @@ public class UserServiceImpl implements UserService {
         dto.setLastName(user.getLastName());
         dto.setEmail(user.getEmail());
         dto.setRoles(user.getRoles().stream().map(Role::getName).collect(Collectors.toSet()));
+        /*Address address = user.getAddress();
+            dto.setFullAddress(String.format("%s, %s, %s, %s",
+                address.getStreet(), address.getCity(), address.getState(), address.getZipCode()));*/
         return dto;
     }
 

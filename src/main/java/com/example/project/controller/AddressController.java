@@ -22,6 +22,12 @@ public class AddressController {
         return new ResponseEntity<>(newAddress, HttpStatus.CREATED);
     }
 
+    @PostMapping("/{id}")
+    public ResponseEntity<AddressDto> addAddress(@PathVariable Long id, @RequestBody AddressDto addressDto) {
+        AddressDto newAddress = addressService.addAddress(id, addressDto);
+        return new ResponseEntity<>(newAddress, HttpStatus.CREATED);
+    }
+
     @GetMapping
     public ResponseEntity<List<AddressDto>> getaddAddress() {
         List<AddressDto> address = addressService.getAddress();
@@ -51,5 +57,10 @@ public class AddressController {
     public ResponseEntity<Void> deleteAddress(@PathVariable Long id) {
         addressService.deleteAddress(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{addressId}/setPrimary")
+    public ResponseEntity<AddressDto> setPrimaryAddress(@PathVariable Long addressId, @RequestParam Long userId) {
+        return ResponseEntity.ok(addressService.setPrimaryAddress(userId, addressId));
     }
 }

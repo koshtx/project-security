@@ -1,8 +1,8 @@
 import React from 'react';
 import styles from './Modal.module.css';
 
-function Modal({ show, onClose, children }) {
-  if (!show) {
+const Modal = ({ isOpen, onClose, children }) => {
+  if (!isOpen) {
     return null;
   }
 
@@ -16,6 +16,6 @@ function Modal({ show, onClose, children }) {
       </div>
     </div>
   );
-}
+};
 
 export default Modal;

@@ -93,7 +93,7 @@ function AddressList() {
               <td>{address.state}</td>
               <td>{address.zipCode}</td>
               <td>{address.country}</td>
-              <td>{address.isPrimary.toString()}</td>
+              <td>{address.isPrimary}</td>
               <td>
                 <button onClick={() => handleEdit(address)} className={styles.editButton}>Edit</button>
                 <button onClick={() => handleDelete(address.id)} className={styles.deleteButton}>Delete</button>

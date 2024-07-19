@@ -42,6 +42,25 @@ public class AddressServiceImpl implements AddressService {
     }
 
     @Override
+    @Transactional
+    public AddressDto addAddress(Long id, AddressDto addressDto) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Address address = new Address();
+        address.setStreet(addressDto.getStreet());
+        address.setCity(addressDto.getCity());
+        address.setState(addressDto.getState());
+        address.setZipCode(addressDto.getZipCode());
+        address.setCountry(addressDto.getCountry());
+        address.setIsPrimary(addressDto.getIsPrimary());
+        address.setUser(user);
+
+        Address savedAddress = addressRepository.save(address);
+        return convertToDto(savedAddress);
+    }
+
+    @Override
     public Optional<AddressDto> getAddressById(Long id) {
         return addressRepository.findById(id).map(this::convertToDto);
     }
@@ -81,6 +100,26 @@ public class AddressServiceImpl implements AddressService {
     @Transactional
     public void deleteAddress(Long id) {
         addressRepository.deleteById(id);
+    }
+
+    @Override
+    @Transactional
+    public AddressDto setPrimaryAddress(Long userId, Long addressId) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        // Unset previous default address
+        addressRepository.findByUserIdAndIsPrimaryTrue(user.getId())
+            .ifPresent(prevDefault -> {
+                prevDefault.setIsPrimary(false);
+                addressRepository.save(prevDefault);
+            });
+
+        // Set new default address
+        Address newDefault = addressRepository.findById(addressId)
+            .orElseThrow(() -> new RuntimeException("Address not found"));
+        newDefault.setIsPrimary(true);
+        return convertToDto(addressRepository.save(newDefault));
     }
 
     private AddressDto convertToDto(Address address) {

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getUserProfile, updateUserProfile } from '../../../services/userService';
+import AddressManagement from '../../address/AddressManagement/AddressManagement';
 import { useAuth } from '../../../hooks/useAuth';
 import styles from './UserProfile.module.css';
 
@@ -106,6 +107,7 @@ function UserProfile() {
         </div>
         <button type="submit" className={styles.submitButton}>Update Profile</button>
       </form>
+      <AddressManagement />
     </div>
   );
 }

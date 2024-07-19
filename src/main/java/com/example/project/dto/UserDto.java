@@ -17,6 +17,7 @@ public class UserDto {
     private String email;
     private String password;
     private Set<String> roles;
+    private String fullAddress;
 
     public UserDto(Long id, String username, String email) {
         this.id = id;

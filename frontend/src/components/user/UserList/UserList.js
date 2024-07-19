@@ -23,9 +23,6 @@ function UserList() {
     try {
       setIsLoading(true);
       const data = await getUsers();
-      console.log('data:' + data);
-      console.log('user:' + user);
-      console.log('users' + users);
       setUsers(data);
       setFilteredUsers(data);
     } catch (error) {
