@@ -6,11 +6,11 @@ import './AddressManagement.css';
 
 const AddressManagement = () => {
   const [addresses, setAddresses] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [currentAddress, setNewAddress] = useState({ street: '', city: '', state: '', zipCode: '', country: ''});
-  const [error, setError] = useState(null);
-  const [editingAddress, setEditingAddress] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
   const { user } = useAuth();
 
   useEffect(() => {
@@ -31,8 +31,8 @@ const AddressManagement = () => {
 
   const handleAddressChange = (e) => {
     const { name, value } = e.target;
-    if (editingAddress) {
-      setEditingAddress({ ...editingAddress, [name]: value });
+    if (isEditing) {
+      setIsEditing({ ...isEditing, [name]: value });
     } else {
       setNewAddress({ ...currentAddress, [name]: value });
     }
@@ -73,9 +73,9 @@ const AddressManagement = () => {
   const handleUpdateAddress = async (e) => {
     e.preventDefault();
     try {
-      await updateAddress(editingAddress.id, editingAddress);
+      await updateAddress(isEditing.id, isEditing);
       setIsModalOpen(false);
-      setEditingAddress(null);
+      setIsEditing(null);
       await fetchAddresses();
       alert('Dirección actualizada con éxito');
     } catch (error) {
@@ -85,7 +85,7 @@ const AddressManagement = () => {
   };
 
   const openEditModal = (address) => {
-    setEditingAddress(address);
+    setIsEditing(address);
     setIsModalOpen(true);
   };
 
@@ -151,7 +151,7 @@ const AddressManagement = () => {
           <input
             type="text"
             name="street"
-            value={editingAddress?.street || ''}
+            value={isEditing?.street || ''}
             onChange={handleAddressChange}
             placeholder="Calle"
             required
@@ -159,7 +159,7 @@ const AddressManagement = () => {
           <input
             type="text"
             name="city"
-            value={editingAddress?.city || ''}
+            value={isEditing?.city || ''}
             onChange={handleAddressChange}
             placeholder="Ciudad"
             required
@@ -167,7 +167,7 @@ const AddressManagement = () => {
           <input
             type="text"
             name="state"
-            value={editingAddress?.state || ''}
+            value={isEditing?.state || ''}
             onChange={handleAddressChange}
             placeholder="Estado"
             required
@@ -175,7 +175,7 @@ const AddressManagement = () => {
           <input
             type="text"
             name="country"
-            value={editingAddress?.country || ''}
+            value={isEditing?.country || ''}
             onChange={handleAddressChange}
             placeholder="Pais"
             required
@@ -183,7 +183,7 @@ const AddressManagement = () => {
           <input
             type="text"
             name="zipCode"
-            value={editingAddress?.zipCode || ''}
+            value={isEditing?.zipCode || ''}
             onChange={handleAddressChange}
             placeholder="Código Postal"
             required
