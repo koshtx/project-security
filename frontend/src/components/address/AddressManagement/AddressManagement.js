@@ -9,29 +9,16 @@ import AddressForm from '../AddressForm/AddressForm';
 
 const AddressManagement = () => {
   const [addresses, setAddresses] = useState([]);
-  const [currentAddress, setCurrentAddress] = useState({
-    street: '',
-    city: '',
-    state: '',
-    zipCode: '',
-    country: '',
-    isPrimary: false
-  });
-  const [searchTerm, setSearchTerm] = useState('');
   const [filteredAddresses, setFilteredAddresses] = useState([]);
+  const [currentAddress, setCurrentAddress] = useState({ street: '', city: '', state: '', zipCode: '', country: '', isPrimary: false });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [addressesPerPage] = useState(2);
   const [error, setError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [addressesPerPage] = useState(5);
+  const [searchTerm, setSearchTerm] = useState('');
   const { user } = useAuth();
-
-  const indexOfLastAddress = currentPage * addressesPerPage;
-  const indexOfFirstAddress = indexOfLastAddress - addressesPerPage;
-  const currentAddresses = filteredAddresses.slice(indexOfFirstAddress, indexOfLastAddress);
-
-  const paginate = pageNumber => setCurrentPage(pageNumber);
 
   const fetchAddresses = useCallback(async () => {
     setIsLoading(true);
@@ -43,7 +30,6 @@ const AddressManagement = () => {
     } catch (error) {
       console.error('Error fetching addresses:', error);
       setError('Error al cargar las direcciones. Por favor, intente de nuevo más tarde.');
-      setAddresses([]);
     } finally {
       setIsLoading(false);
     }
@@ -65,15 +51,8 @@ const AddressManagement = () => {
     setCurrentPage(1);  // Reset to first page when search term changes
   }, [searchTerm, addresses]);
 
-
-  const handleSearch = (searchTerm) => {
-    /*const filtered = addresses.filter(address => 
-      address.street.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      address.country.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      address.city.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    setFilteredAddresses(filtered);*/
-    setSearchTerm(searchTerm);
+  const handleSearch = (term) => {
+    setSearchTerm(term);
   };
 
   const handleAddressChange = (e) => {
@@ -84,54 +63,26 @@ const AddressManagement = () => {
     }));
   };
 
-  const updateAddressesPrimaryStatus = (addresses, newPrimaryAddressId) => {
-    return addresses.map(addr => ({
-      ...addr,
-      isPrimary: addr.id === newPrimaryAddressId
-    }));
-  };
-  
-  const addOrUpdateAddress = async (address, isEditing) => {
-    if (isEditing) {
-      return await updateAddress(address.id, address);
-    } else {
-      return await addAddress(user.id, address);
-    }
-  };
-
   const handleSubmitAddress = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
     try {
-      const updatedAddress = await addOrUpdateAddress(currentAddress, isEditing);
-      
-      if (updatedAddress.isPrimary) {
-        setAddresses(prevAddresses => updateAddressesPrimaryStatus(prevAddresses, updatedAddress.id));
+      if (isEditing) {
+        await updateAddress(currentAddress.id, currentAddress);
+      } else {
+        await addAddress(user.id, currentAddress);
       }
-  
       setIsModalOpen(false);
-      resetCurrentAddress();
+      setCurrentAddress({ street: '', city: '', state: '', zipCode: '', country: '', isPrimary: false });
       await fetchAddresses();
-      showSuccessMessage(isEditing);
+      alert(`Dirección ${isEditing ? 'actualizada' : 'añadida'} con éxito`);
     } catch (error) {
-      handleAddressError(error, isEditing);
+      console.error('Error submitting address:', error);
+      setError(`Error al ${isEditing ? 'actualizar' : 'añadir'} la dirección. Por favor, intente de nuevo.`);
     } finally {
       setIsLoading(false);
     }
-  };
-  
-  const resetCurrentAddress = () => {
-    setCurrentAddress({ street: '', city: '', state: '', zipCode: '', country: '', isPrimary: false });
-  };
-  
-  const showSuccessMessage = (isEditing) => {
-    console.log(`Dirección ${isEditing ? 'actualizada' : 'añadida'} con éxito`);
-  };
-  
-  const handleAddressError = (error, isEditing) => {
-    console.error('Error submitting address:', error);
-    setError(`Error al ${isEditing ? 'actualizar' : 'añadir'} la dirección. Por favor, intente de nuevo.`);
   };
 
   const handleDeleteAddress = async (addressId) => {
@@ -175,6 +126,12 @@ const AddressManagement = () => {
     setIsModalOpen(true);
   };
 
+  const indexOfLastAddress = currentPage * addressesPerPage;
+  const indexOfFirstAddress = indexOfLastAddress - addressesPerPage;
+  const currentAddresses = filteredAddresses.slice(indexOfFirstAddress, indexOfLastAddress);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
   return (
     <div className="address-management">
       <h2>Mis Direcciones</h2>
@@ -186,24 +143,27 @@ const AddressManagement = () => {
       ) : currentAddresses.length > 0 ? (
         <div className="address-list">
           {currentAddresses.map(address => (
-          <div key={address.id} className="address-item">
-            <p>{address.street}, {address.city}, {address.state} {address.zipCode}, {address.country}</p>
-            <div className="address-actions">
-              <button onClick={() => handleSetPrimaryAddress(address.id)} className={address.isPrimary ? 'primary-btn' : 'set-primary-btn'}>
-                {address.isPrimary ? 'Dirección Principal' : 'Establecer como Principal'}
-              </button>
-              <button onClick={() => openAddressModal(address)} className="edit-btn">Editar</button>
-              <button onClick={() => handleDeleteAddress(address.id)} className="delete-btn">Eliminar</button>
+            <div key={address.id} className="address-item">
+              <p>{address.street}, {address.city}, {address.state} {address.zipCode}, {address.country}</p>
+              <div className="address-actions">
+                <button 
+                  onClick={() => handleSetPrimaryAddress(address.id)} 
+                  className={address.isPrimary ? 'primary-btn' : 'set-primary-btn'}
+                >
+                  {address.isPrimary ? 'Dirección Principal' : 'Establecer como Principal'}
+                </button>
+                <button onClick={() => openAddressModal(address)} className="edit-btn">Editar</button>
+                <button onClick={() => handleDeleteAddress(address.id)} className="delete-btn">Eliminar</button>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
         </div>
       ) : (
-        <p>No hay direcciones disponibles.</p>
+        <p>No se encontraron direcciones.</p>
       )}
       <Pagination
         addressesPerPage={addressesPerPage}
-        totalAddresses={addresses.length}
+        totalAddresses={filteredAddresses.length}
         currentPage={currentPage}
         paginate={paginate}
       />
