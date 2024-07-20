@@ -18,6 +18,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 
 import java.util.Optional;
+import java.util.Set;
+import java.util.HashSet;
 
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -48,7 +50,7 @@ class AuthenticationControllerTest {
     void testAuthenticateUser() {
         LoginRequest loginRequest = new LoginRequest("testuser", "password");
         Authentication authentication = mock(Authentication.class);
-        UserDto userDto = new UserDto(1L, "testuser", "test@example.com", null);
+        UserDto userDto = new UserDto(1L, "testuser", "test@example.com");
         
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).thenReturn(authentication);
         when(userService.getUserByUsername("testuser")).thenReturn(Optional.of(userDto));
@@ -67,8 +69,10 @@ class AuthenticationControllerTest {
 
     @Test
     void testRegisterUser() {
-        RegisterRequest registerRequest = new RegisterRequest("newuser", "new@example.com", "password");
-        UserDto registeredUser = new UserDto(1L, "newuser", "new@example.com", null);
+        Set<String> roles = new HashSet<String>();
+        roles.add("ROLE_ADMIN");
+        RegisterRequest registerRequest = new RegisterRequest("newuser", "new@example.com", "password", roles);
+        UserDto registeredUser = new UserDto(1L, "newuser", "new@example.com");
         
         when(userService.existsByUsername("newuser")).thenReturn(false);
         when(userService.existsByEmail("new@example.com")).thenReturn(false);
@@ -86,7 +90,9 @@ class AuthenticationControllerTest {
 
     @Test
     void testRegisterUserUsernameExists() {
-        RegisterRequest registerRequest = new RegisterRequest("existinguser", "new@example.com", "password");
+        Set<String> roles = new HashSet<String>();
+        roles.add("ROLE_ADMIN");
+        RegisterRequest registerRequest = new RegisterRequest("existinguser", "new@example.com", "password",roles);
         
         when(userService.existsByUsername("existinguser")).thenReturn(true);
 
@@ -98,7 +104,9 @@ class AuthenticationControllerTest {
 
     @Test
     void testRegisterUserEmailExists() {
-        RegisterRequest registerRequest = new RegisterRequest("newuser", "existing@example.com", "password");
+        Set<String> roles = new HashSet<String>();
+        roles.add("ROLE_ADMIN");
+        RegisterRequest registerRequest = new RegisterRequest("newuser", "existing@example.com", "password", roles);
         
         when(userService.existsByUsername("newuser")).thenReturn(false);
         when(userService.existsByEmail("existing@example.com")).thenReturn(true);

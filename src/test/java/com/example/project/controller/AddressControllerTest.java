@@ -30,8 +30,8 @@ class AddressControllerTest {
 
     @Test
     void testAddAddress() {
-        AddressDto addressDto = new AddressDto(null, "123 Test St", "Test City", "Test State", "12345");
-        AddressDto savedAddress = new AddressDto(1L, "123 Test St", "Test City", "Test State", "12345");
+        AddressDto addressDto = new AddressDto(null, "123 Test St", "Test City", "Test State", "12345","MX",true);
+        AddressDto savedAddress = new AddressDto(1L, "123 Test St", "Test City", "Test State", "12345","MX",true);
         when(addressService.addAddress(any(AddressDto.class))).thenReturn(savedAddress);
 
         ResponseEntity<AddressDto> response = addressController.addAddress(addressDto);
@@ -43,7 +43,7 @@ class AddressControllerTest {
 
     @Test
     void testGetAddressById() {
-        AddressDto address = new AddressDto(1L, "123 Test St", "Test City", "Test State", "12345");
+        AddressDto address = new AddressDto(1L, "123 Test St", "Test City", "Test State", "12345", "MX",true);
         when(addressService.getAddressById(1L)).thenReturn(Optional.of(address));
 
         ResponseEntity<?> response = addressController.getAddressById(1L);

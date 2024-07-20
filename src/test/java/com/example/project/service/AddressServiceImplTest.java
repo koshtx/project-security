@@ -13,6 +13,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.Optional;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -34,10 +35,10 @@ class AddressServiceImplTest {
 
     @Test
     void testAddAddress() {
-        AddressDto addressDto = new AddressDto(null, "123 Test St", "Test City", "Test State", "12345", 1L);
+        AddressDto addressDto = new AddressDto(null, "123 Test St", "Test City", "Test State", "12345", "MX",true, 1L);
         User user = new User();
         user.setId(1L);
-        Address savedAddress = new Address(1L, "123 Test St", "Test City", "Test State", "12345", user);
+        Address savedAddress = new Address(1L, "123 Test St", "Test City", "Test State", "12345", "MX",true, user);
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(addressRepository.save(any(Address.class))).thenReturn(savedAddress);
@@ -54,7 +55,7 @@ class AddressServiceImplTest {
     void testGetAddressById() {
         User user = new User();
         user.setId(1L);
-        Address address = new Address(1L, "123 Test St", "Test City", "Test State", "12345", user);
+        Address address = new Address(1L, "123 Test St", "Test City", "Test State", "12345", "MX",true, user);
         when(addressRepository.findById(1L)).thenReturn(Optional.of(address));
 
         Optional<AddressDto> result = addressService.getAddressById(1L);

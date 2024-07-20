@@ -1,107 +1,64 @@
-import React, { useState, useEffect } from 'react';
-import styles from './AddressForm.module.css';
+// AddressForm.js
+import React from 'react';
 
-function AddressForm({ address, onSave }) {
-  const [formData, setFormData] = useState({
-    street: '',
-    city: '',
-    country: '',
-    state: '',
-    zipCode: ''
-  });
-
-  useEffect(() => {
-    if (address) {
-      setFormData(address);
-    }
-  }, [address]);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prevState => ({
-      ...prevState,
-      [name]: value
-    }));
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onSave(formData);
-  };
-
+const AddressForm = ({ address, onChange, onSubmit, isEditing }) => {
   return (
-    <form onSubmit={handleSubmit} className={styles.addressForm}>
-      <div className={styles.formGroup}>
-        <label htmlFor="street">Street:</label>
+    <form onSubmit={onSubmit} className="address-form">
+      <input
+        type="text"
+        name="street"
+        value={address.street}
+        onChange={onChange}
+        placeholder="Calle"
+        required
+      />
+      <input
+        type="text"
+        name="city"
+        value={address.city}
+        onChange={onChange}
+        placeholder="Ciudad"
+        required
+      />
+      <input
+        type="text"
+        name="state"
+        value={address.state}
+        onChange={onChange}
+        placeholder="Estado"
+        required
+      />
+      <input
+        type="text"
+        name="zipCode"
+        value={address.zipCode}
+        onChange={onChange}
+        placeholder="Código Postal"
+        required
+      />
+      <input
+        type="text"
+        name="country"
+        value={address.country}
+        onChange={onChange}
+        placeholder="País"
+        required
+      />
+      <div className="checkbox-container">
         <input
-          type="text"
-          id="street"
-          name="street"
-          value={formData.street}
-          onChange={handleChange}
-          required
-        />
-      </div>
-      <div className={styles.formGroup}>
-        <label htmlFor="city">City:</label>
-        <input
-          type="text"
-          id="city"
-          name="city"
-          value={formData.city}
-          onChange={handleChange}
-          required
-        />
-      </div>
-      <div className={styles.formGroup}>
-        <label htmlFor="state">State:</label>
-        <input
-          type="text"
-          id="state"
-          name="state"
-          value={formData.state}
-          onChange={handleChange}
-          required
-        />
-      </div>
-      <div className={styles.formGroup}>
-        <label htmlFor="zipCode">Zip Code:</label>
-        <input
-          type="text"
-          id="zipCode"
-          name="zipCode"
-          value={formData.zipCode}
-          onChange={handleChange}
-          required
-        />
-      </div>
-      <div className={styles.formGroup}>
-        <label htmlFor="country">Country:</label>
-        <input
-          type="text"
-          id="country"
-          name="country"
-          value={formData.country}
-          onChange={handleChange}
-          required
-        />
-      </div>
-      <div className={styles.formGroup}>
-        <label htmlFor="isPrimary">is Primary?:</label>
-        <input
-          type="text"
+          type="checkbox"
           id="isPrimary"
           name="isPrimary"
-          value={formData.isPrimary}
-          onChange={handleChange}
-          required
+          checked={address.isPrimary}
+          onChange={onChange}
         />
+        <label htmlFor="isPrimary">Establecer como dirección principal</label>
       </div>
-      <button type="submit" className={styles.submitButton}>
-        {address ? 'Update' : 'Add'} Address
+      <button type="submit" className="submit-btn">
+        {isEditing ? 'Actualizar Dirección' : 'Añadir Dirección'}
       </button>
     </form>
   );
-}
+};
 
 export default AddressForm;

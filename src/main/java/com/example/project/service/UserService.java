@@ -9,6 +9,9 @@ import java.util.Optional;
 public interface UserService {
     UserDto registerUser(RegisterRequest registerRequest);
     Optional<UserDto> getUserByUsername(String username);
+    UserDto getUserById(Long id);
+    UserDto updateUser(Long id, UserDto userDto);
+    void deleteUser(Long id);
     List<UserDto> getAllUsers();
     boolean existsByUsername(String username);
     boolean existsByEmail(String email);

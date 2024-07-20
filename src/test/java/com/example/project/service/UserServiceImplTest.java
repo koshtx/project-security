@@ -15,7 +15,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.HashSet;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -40,7 +42,9 @@ class UserServiceImplTest {
 
     @Test
     void testRegisterUser() {
-        RegisterRequest registerRequest = new RegisterRequest("testuser", "test@example.com", "password");
+        Set<String> roles = new HashSet<String>();
+        roles.add("ROLE_ADMIN");
+        RegisterRequest registerRequest = new RegisterRequest("testuser", "test@example.com", "password", roles);
         Role userRole = new Role(1L, "ROLE_USER");
         User user = new User(1L, "testuser", "encodedPassword", "test@example.com", Set.of(userRole));
 

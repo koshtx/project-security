@@ -15,8 +15,8 @@ export const getAddress = async (id) => {
   return response.data;
 };
 
-export const addAddress = async (addressData) => {
-  const response = await api.post('/addresses', addressData);
+export const addAddress = async (id, addressData) => {
+  const response = await api.post(`/addresses/${id}`, addressData);
   return response.data;
 };
 
