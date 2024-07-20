@@ -102,7 +102,7 @@ function AddressList() {
           ))}
         </tbody>
       </table>
-      <Modal show={showModal} onClose={handleCloseModal}>
+      <Modal isOpen={showModal} onClose={handleCloseModal}>
         <AddressForm address={selectedAddress} onSave={handleSave} />
       </Modal>
     </div>

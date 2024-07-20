@@ -109,7 +109,7 @@ function UserList() {
           ))}
         </tbody>
       </table>
-      <Modal show={showModal} onClose={handleCloseModal}>
+      <Modal isOpen={showModal} onClose={handleCloseModal}>
         <UserForm user1={selectedUser} onSave={handleSave} />
       </Modal>
     </div>

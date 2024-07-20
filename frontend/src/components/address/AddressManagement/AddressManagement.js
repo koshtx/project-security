@@ -20,7 +20,7 @@ const AddressManagement = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const [addressesPerPage] = useState(1);
+  const [addressesPerPage] = useState(2);
   const [error, setError] = useState(null);
   const { user } = useAuth();
 
