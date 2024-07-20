@@ -85,7 +85,7 @@ function RoleList() {
           ))}
         </tbody>
       </table>
-      <Modal show={showModal} onClose={handleCloseModal}>
+      <Modal isOpen={showModal} onClose={handleCloseModal}>
         <RoleForm role={selectedRole} onSave={handleSave} />
       </Modal>
     </div>
