@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { getUserAddresses, addAddress, updateAddress, deleteAddress, setPrimaryAddress } from '../../../services/addressService';
+import AddressSearch from '../AddressSearch/AddressSearch';
 import { useAuth } from '../../../hooks/useAuth';
 import Modal from '../../common/Modal/Modal';
 import Pagination from '../../common/Pagination';
@@ -16,6 +17,8 @@ const AddressManagement = () => {
     country: '',
     isPrimary: false
   });
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filteredAddresses, setFilteredAddresses] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -26,7 +29,7 @@ const AddressManagement = () => {
 
   const indexOfLastAddress = currentPage * addressesPerPage;
   const indexOfFirstAddress = indexOfLastAddress - addressesPerPage;
-  const currentAddresses = addresses.slice(indexOfFirstAddress, indexOfLastAddress);
+  const currentAddresses = filteredAddresses.slice(indexOfFirstAddress, indexOfLastAddress);
 
   const paginate = pageNumber => setCurrentPage(pageNumber);
 
@@ -36,6 +39,7 @@ const AddressManagement = () => {
     try {
       const data = await getUserAddresses(user.id);
       setAddresses(data);
+      setFilteredAddresses(data);
     } catch (error) {
       console.error('Error fetching addresses:', error);
       setError('Error al cargar las direcciones. Por favor, intente de nuevo más tarde.');
@@ -48,6 +52,29 @@ const AddressManagement = () => {
   useEffect(() => {
     fetchAddresses();
   }, [fetchAddresses]);
+
+  useEffect(() => {
+    const results = addresses.filter(address =>
+      address.street.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      address.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      address.state.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      address.zipCode.includes(searchTerm) ||
+      address.country.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredAddresses(results);
+    setCurrentPage(1);  // Reset to first page when search term changes
+  }, [searchTerm, addresses]);
+
+
+  const handleSearch = (searchTerm) => {
+    /*const filtered = addresses.filter(address => 
+      address.street.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      address.country.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      address.city.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredAddresses(filtered);*/
+    setSearchTerm(searchTerm);
+  };
 
   const handleAddressChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -151,6 +178,7 @@ const AddressManagement = () => {
   return (
     <div className="address-management">
       <h2>Mis Direcciones</h2>
+      <AddressSearch onSearch={handleSearch} />
       {isLoading ? (
         <div className="loading">Cargando direcciones...</div>
       ) : error ? (

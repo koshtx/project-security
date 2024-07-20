@@ -1,17 +1,27 @@
 import React, { useState, useEffect } from 'react';
-import { getAddresses, deleteAddress } from '../../../services/addressService';
+import { getAddresses, deleteAddress, addAddress, updateAddress } from '../../../services/addressService';
 import AddressSearch from '../AddressSearch/AddressSearch';
+import { useAuth } from '../../../hooks/useAuth';
 import AddressForm from '../AddressForm/AddressForm';
 import Modal from '../../common/Modal/Modal';
 import styles from './AddressList.module.css';
 
 function AddressList() {
   const [addresses, setAddresses] = useState([]);
+  const [currentAddress, setCurrentAddress] = useState({
+    street: '',
+    city: '',
+    state: '',
+    zipCode: '',
+    country: '',
+    isPrimary: false
+  });
   const [filteredAddresses, setFilteredAddresses] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [showModal, setShowModal] = useState(false);
-  const [selectedAddress, setSelectedAddress] = useState(null);
+  const { user } = useAuth();
 
   useEffect(() => {
     fetchAddresses();
@@ -25,6 +35,7 @@ function AddressList() {
       setFilteredAddresses(data);
     } catch (error) {
       setError('Failed to fetch addresses');
+      setAddresses([]);
     } finally {
       setIsLoading(false);
     }
@@ -39,9 +50,17 @@ function AddressList() {
     setFilteredAddresses(filtered);
   };
 
-  const handleEdit = (address) => {
-    setSelectedAddress(address);
-    setShowModal(true);
+  const resetCurrentAddress = () => {
+    setCurrentAddress({ street: '', city: '', state: '', zipCode: '', country: '', isPrimary: false });
+  };
+  
+  const showSuccessMessage = (isEditing) => {
+    console.log(`Dirección ${isEditing ? 'actualizada' : 'añadida'} con éxito`);
+  };
+  
+  const handleAddressError = (error, isEditing) => {
+    console.error('Error submitting address:', error);
+    setError(`Error al ${isEditing ? 'actualizar' : 'añadir'} la dirección. Por favor, intente de nuevo.`);
   };
 
   const handleDelete = async (addressId) => {
@@ -55,14 +74,60 @@ function AddressList() {
     }
   };
 
-  const handleCloseModal = () => {
-    setShowModal(false);
-    setSelectedAddress(null);
+  const addOrUpdateAddress = async (address, isEditing) => {
+    if (isEditing) {
+      return await updateAddress(address.id, address);
+    } else {
+      return await addAddress(user.id, address);
+    }
   };
 
-  const handleSave = () => {
-    fetchAddresses();
-    handleCloseModal();
+  const handleSubmitAddress = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError(null);
+    try {
+      const updatedAddress = await addOrUpdateAddress(currentAddress, isEditing);
+      
+      if (updatedAddress.isPrimary) {
+        setAddresses(prevAddresses => updateAddressesPrimaryStatus(prevAddresses, updatedAddress.id));
+      }
+  
+      setIsModalOpen(false);
+      resetCurrentAddress();
+      await fetchAddresses();
+      showSuccessMessage(isEditing);
+    } catch (error) {
+      handleAddressError(error, isEditing);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleAddressChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setCurrentAddress(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }));
+  };
+
+  const updateAddressesPrimaryStatus = (addresses, newPrimaryAddressId) => {
+    return addresses.map(addr => ({
+      ...addr,
+      isPrimary: addr.id === newPrimaryAddressId
+    }));
+  };
+
+  const openAddressModal = (address = null) => {
+    if (address) {
+      setCurrentAddress({...address, isPrimary: address.isPrimary || false});
+      setIsEditing(true);
+    } else {
+      setCurrentAddress({ street: '', city: '', state: '', zipCode: '', country: '', isPrimary: false });
+      setIsEditing(false);
+    }
+    setIsModalOpen(true);
   };
 
   if (isLoading) return <div>Loading...</div>;
@@ -72,7 +137,7 @@ function AddressList() {
     <div className={styles.addressList}>
       <h2>Address Management</h2>
       <AddressSearch onSearch={handleSearch} />
-      <button onClick={() => setShowModal(true)} className={styles.addButton}>Add New Address</button>
+      <button onClick={() => openAddressModal()} className="add-btn">Añadir Nueva Dirección</button>
       <table className={styles.addressTable}>
         <thead>
           <tr>
@@ -95,15 +160,22 @@ function AddressList() {
               <td>{address.country}</td>
               <td>{address.isPrimary}</td>
               <td>
-                <button onClick={() => handleEdit(address)} className={styles.editButton}>Edit</button>
+                <button onClick={() => openAddressModal(address)} className={styles.editButton}>Edit</button>
                 <button onClick={() => handleDelete(address.id)} className={styles.deleteButton}>Delete</button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
-      <Modal isOpen={showModal} onClose={handleCloseModal}>
-        <AddressForm address={selectedAddress} onSave={handleSave} />
+      
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <h3>{isEditing ? 'Editar Dirección' : 'Añadir Nueva Dirección'}</h3>
+        <AddressForm
+          address={currentAddress}
+          onChange={handleAddressChange}
+          onSubmit={handleSubmitAddress}
+          isEditing={isEditing}
+        />
       </Modal>
     </div>
   );
